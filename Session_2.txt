@@ -1,0 +1,18 @@
+---query to check actual and estimated plans
+USE AdventureWorks2019
+SELECT*
+FROM Person.Person 
+
+---long running query
+SELECT * FROM Sales.SalesOrderDetail s
+INNER JOIN Production.Product p ON s.ProductID = p.ProductID
+INNER JOIN Production.Product p1 ON s.ProductID = p1.ProductID
+INNER JOIN Production.Product p2 ON s.ProductID = p2.ProductID
+INNER JOIN Production.Product p3 ON s.ProductID = p3.ProductID
+waitfor delay '01:40'
+
+---DMVs to get inflight plans
+SELECT * FROM sys.dm_exec_query_profiles
+WHERE session_id=54
+
+SELECT * FROM sys.dm_exec_query_statistics_xml(54)
