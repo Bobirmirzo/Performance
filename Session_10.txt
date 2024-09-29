@@ -1,0 +1,39 @@
+SELECT * FROM sys.dm_os_schedulers
+
+----Create data for parallelism
+SELECT *
+INTO #temp
+FROM Sales.SalesOrderDetail
+UNION ALL SELECT * FROM Sales.SalesOrderDetail
+UNION ALL SELECT * FROM Sales.SalesOrderDetail
+UNION ALL SELECT * FROM Sales.SalesOrderDetail
+UNION ALL SELECT * FROM Sales.SalesOrderDetail
+UNION ALL SELECT * FROM Sales.SalesOrderDetail
+UNION ALL SELECT * FROM Sales.SalesOrderDetail
+UNION ALL SELECT * FROM Sales.SalesOrderDetail
+UNION ALL SELECT * FROM Sales.SalesOrderDetail
+
+---Generate parallelism execution plan
+SELECT ProductID, COUNT(*)
+FROM #temp
+GROUP BY ProductID
+dbcc FREEPROCCACHE
+
+---Generate another example
+SELECT * FROM dbo.SalesOrderDetail2 s1 JOIN dbo.
+SalesOrderDetail2 s2
+ON s1.id = s2.id
+
+----Example for serial plan
+SELECT * FROM dbo.SalesOrderDetail2 s1 JOIN dbo.
+SalesOrderDetail2 s2
+ON s1.id = s2.id
+OPTION (MAXDOP 1) 
+
+---Fine tuning the query
+CREATE INDEX IX_id on dbo.SalesOrderDetail2 ([id])
+SELECT * FROM dbo.SalesOrderDetail2 s1 JOIN dbo.
+SalesOrderDetail2 s2
+ON s1.id = s2.id
+WHERE s1.id=1
+OPTION (MAXDOP 1) 
